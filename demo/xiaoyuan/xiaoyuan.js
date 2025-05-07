@@ -15,7 +15,13 @@ function prepareArgs(args) {
         if (arg instanceof NativePointer) {
             // 如果是 NativePointer，直接使用
             argPtr = arg;
-        } else if (typeof arg === 'number') {
+        }else if(typeof arg === 'object' ){
+            // 如果是对象，直接转换为指针
+            //形如 jstring Java_com_demo_app_genToken(JNIEnv *env, jobject obj, long str)这种registerNative的函数参数对象可以处理
+            argPtr = ptr(arg);
+        }
+    
+        else if (typeof arg === 'number') {
             // 如果是数字，直接转换为指针
             argPtr = ptr(arg);
         } else if (typeof arg === 'string') {
@@ -50,7 +56,7 @@ var soPath = "/data/local/tmp/test.so"; // 示例路径
 var  soPathPtr = Memory.allocUtf8String(soPath);
 var handle = dlopen(soPathPtr, 2);
 
-var traceaddr = Module.findExportByName("test.so", 'start_trace');
+var traceaddr = Module.findExportByName("test.so", 'vm_call');
 var trace = new NativeFunction(traceaddr, 'pointer', ['pointer', 'pointer', 'uint32','pointer','uint32']);
 var aimbase =Module.findBaseAddress("libRequestEncoder.so");
 var targetFuncAddr = aimbase.add(0x61bf4);
